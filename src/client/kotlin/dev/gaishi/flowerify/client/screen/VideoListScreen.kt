@@ -1,5 +1,6 @@
 package dev.gaishi.flowerify.client.screen
 
+import dev.gaishi.flowerify.client.Video
 import dev.gaishi.flowerify.client.widget.VideoListEntry
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
@@ -20,18 +21,32 @@ class VideoListScreen(title: Text?) : Screen(title) {
     val layout = ThreePartsLayoutWidget(this)
 
     override fun init() {
+        println("Init")
+        val videoDirectory = MinecraftClient
+            .getInstance()
+            .runDirectory
+            .toPath()
+            .resolve("config")
+            .resolve("flowerify")
+            .resolve("videos")
+        if (videoDirectory.notExists()) {
+            videoDirectory.createDirectories()
+        }
+        val videos = videoDirectory
+            .toFile()
+            .listFiles { file -> file.isFile }
+            ?.filter { file -> file.name.endsWith(".mp4") }
+            ?.map { file -> Video(file) }
+            ?.toSet() ?: emptySet()
+        println(videos)
+
         layout.addHeader(Text.of("Videos"), this.textRenderer)
 
-        layout.addBody(VideoListWidget())
+        layout.addBody(VideoListWidget(videos))
 
         val footer = layout.addFooter(DirectionalLayoutWidget.horizontal().spacing(8))
         footer.add(ButtonWidget.builder(Text.of("Open Folder")) { _ ->
-            val runDirectoryPath = MinecraftClient.getInstance().runDirectory.toPath()
-            val videoDirectoryPath = runDirectoryPath.resolve("config").resolve("flowerify").resolve("videos")
-            if (videoDirectoryPath.notExists()) {
-                videoDirectoryPath.createDirectories()
-            }
-            Util.getOperatingSystem().open(videoDirectoryPath)
+            Util.getOperatingSystem().open(videoDirectory)
         }.build())
         footer.add(ButtonWidget.builder(Text.of("Close")) { _ -> this.close() }.build())
 
@@ -55,7 +70,7 @@ class VideoListScreen(title: Text?) : Screen(title) {
     }
 
     @Environment(EnvType.CLIENT)
-    inner class VideoListWidget: ElementListWidget<VideoListEntry>(
+    inner class VideoListWidget(videos: Set<Video>): ElementListWidget<VideoListEntry>(
         MinecraftClient.getInstance(),
         this@VideoListScreen.width,
         this@VideoListScreen.layout.contentHeight,
@@ -63,8 +78,8 @@ class VideoListScreen(title: Text?) : Screen(title) {
         24,
     ) {
         init {
-            for (i in 0..3) {
-                this.addEntry(VideoListEntry())
+            for (video in videos) {
+                this.addEntry(VideoListEntry(video))
             }
         }
     }

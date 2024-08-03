@@ -1,5 +1,6 @@
 package dev.gaishi.flowerify.client.widget
 
+import dev.gaishi.flowerify.client.Video
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.MinecraftClient
@@ -10,7 +11,7 @@ import net.minecraft.client.gui.widget.ClickableWidget
 import net.minecraft.client.gui.widget.ElementListWidget
 
 @Environment(EnvType.CLIENT)
-class VideoListEntry: ElementListWidget.Entry<VideoListEntry>() {
+class VideoListEntry(private val video: Video): ElementListWidget.Entry<VideoListEntry>() {
     private val children = ArrayList<ClickableWidget>()
 
     override fun render(
@@ -25,7 +26,7 @@ class VideoListEntry: ElementListWidget.Entry<VideoListEntry>() {
         hovered: Boolean,
         tickDelta: Float
     ) {
-        context.drawText(MinecraftClient.getInstance().textRenderer, "Entry", x, y, 0xFFFFFFFF.toInt(), true)
+        context.drawText(MinecraftClient.getInstance().textRenderer, video.name, x, y, 0xFFFFFFFF.toInt(), true)
     }
 
     override fun children(): MutableList<out Element> {
