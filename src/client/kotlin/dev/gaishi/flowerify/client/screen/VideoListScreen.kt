@@ -1,0 +1,71 @@
+package dev.gaishi.flowerify.client.screen
+
+import dev.gaishi.flowerify.client.widget.VideoListEntry
+import net.fabricmc.api.EnvType
+import net.fabricmc.api.Environment
+import net.minecraft.client.MinecraftClient
+import net.minecraft.client.gui.DrawContext
+import net.minecraft.client.gui.screen.Screen
+import net.minecraft.client.gui.widget.ButtonWidget
+import net.minecraft.client.gui.widget.DirectionalLayoutWidget
+import net.minecraft.client.gui.widget.ElementListWidget
+import net.minecraft.client.gui.widget.ThreePartsLayoutWidget
+import net.minecraft.text.Text
+import net.minecraft.util.Util
+import kotlin.io.path.createDirectories
+import kotlin.io.path.notExists
+
+@Environment(EnvType.CLIENT)
+class VideoListScreen(title: Text?) : Screen(title) {
+    val layout = ThreePartsLayoutWidget(this)
+
+    override fun init() {
+        layout.addHeader(Text.of("Videos"), this.textRenderer)
+
+        layout.addBody(VideoListWidget())
+
+        val footer = layout.addFooter(DirectionalLayoutWidget.horizontal().spacing(8))
+        footer.add(ButtonWidget.builder(Text.of("Open Folder")) { _ ->
+            val runDirectoryPath = MinecraftClient.getInstance().runDirectory.toPath()
+            val videoDirectoryPath = runDirectoryPath.resolve("config").resolve("flowerify").resolve("videos")
+            if (videoDirectoryPath.notExists()) {
+                videoDirectoryPath.createDirectories()
+            }
+            Util.getOperatingSystem().open(videoDirectoryPath)
+        }.build())
+        footer.add(ButtonWidget.builder(Text.of("Close")) { _ -> this.close() }.build())
+
+        layout.forEachChild { element ->
+            addDrawableChild(element)
+        }
+        this.initTabNavigation()
+    }
+
+    override fun initTabNavigation() {
+        layout.refreshPositions()
+    }
+
+    override fun render(context: DrawContext, mouseX: Int, mouseY: Int, delta: Float) {
+        super.render(context, mouseX, mouseY, delta)
+
+        // Minecraft doesn't have a "label" widget, so we'll have to draw our own text.
+        // We'll subtract the font height from the Y position to make the text appear above the button.
+        // Subtracting an extra 10 pixels will give the text some padding.
+        // textRenderer, text, x, y, color, hasShadow
+    }
+
+    @Environment(EnvType.CLIENT)
+    inner class VideoListWidget: ElementListWidget<VideoListEntry>(
+        MinecraftClient.getInstance(),
+        this@VideoListScreen.width,
+        this@VideoListScreen.layout.contentHeight,
+        this@VideoListScreen.layout.headerHeight,
+        24,
+    ) {
+        init {
+            for (i in 0..3) {
+                this.addEntry(VideoListEntry())
+            }
+        }
+    }
+}

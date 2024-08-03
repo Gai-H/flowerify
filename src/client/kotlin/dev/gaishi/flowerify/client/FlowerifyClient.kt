@@ -1,6 +1,7 @@
 package dev.gaishi.flowerify.client
 
 import com.mojang.brigadier.Command
+import dev.gaishi.flowerify.client.screen.MenuScreen
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.minecraft.client.MinecraftClient

@@ -1,4 +1,4 @@
-package dev.gaishi.flowerify.client
+package dev.gaishi.flowerify.client.screen
 
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
@@ -7,29 +7,14 @@ import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.widget.ButtonWidget
 import net.minecraft.text.Text
-import net.minecraft.util.Util
-import kotlin.io.path.createDirectories
-import kotlin.io.path.notExists
 
 @Environment(EnvType.CLIENT)
 class MenuScreen(title: Text?) : Screen(title) {
 
     override fun init() {
-        val buttonWidget = ButtonWidget.builder(Text.of("Open Video Folder")) { btn ->
-            val runDirectoryPath = MinecraftClient.getInstance().runDirectory.toPath()
-            val videoDirectoryPath = runDirectoryPath.resolve("config").resolve("flowerify").resolve("videos")
-
-            if (videoDirectoryPath.notExists()) {
-                videoDirectoryPath.createDirectories()
-            }
-
-            Util.getOperatingSystem().open(videoDirectoryPath)
-        }.dimensions(40, 40, 120, 20).build()
-        // x, y, width, height
-        // It's recommended to use the fixed height of 20 to prevent rendering issues with the button textures.
-
-        // Register the button widget.
-        this.addDrawableChild(buttonWidget)
+        this.addDrawableChild((ButtonWidget.builder(Text.of("Videos")) { _ ->
+            MinecraftClient.getInstance().setScreen(VideoListScreen(Text.empty()))
+        }).dimensions(40, 40, 120, 20).build())
     }
 
     override fun render(context: DrawContext, mouseX: Int, mouseY: Int, delta: Float) {
