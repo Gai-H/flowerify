@@ -75,12 +75,16 @@ class VideoListScreen(title: Text?) : Screen(title) {
         this@VideoListScreen.width,
         this@VideoListScreen.layout.contentHeight,
         this@VideoListScreen.layout.headerHeight,
-        24,
+        48,
     ) {
         init {
             for (video in videos) {
                 this.addEntry(VideoListEntry(video))
             }
+        }
+
+        override fun getRowWidth(): Int {
+            return 400
         }
     }
 }
